@@ -45,8 +45,7 @@ def main():
 
     print '<unit_test_evaluation> Succesfully parsed arguments: processName= [%s], region= %s, JES_flag= %s , selection= %s' %(processes, region, JES_flag, selection)
 
-    #outputname = '2017samples_tH_tunedweights_%s' % (selection)
-    outputname = 'debug_%s' % (selection)
+    outputname = '2017tautag2p1samples_xsecrwonly_newvars_tH_selection_%s' % (selection)
 
     input_var_jsonFile = ''
 
@@ -56,8 +55,7 @@ def main():
         outputname = outputname+'_JESDown'
 
     # Open and load input variable .json
-
-    input_var_jsonFile = open('../input_vars_SigRegion_wFwdJet.json','r')
+    input_var_jsonFile = open('../input_features_new.json','r')
     variable_list = json.load(input_var_jsonFile,encoding="utf-8").items()
 
     # Append variables to a list of column headers for .csv file later
@@ -65,6 +63,7 @@ def main():
     for key,var in variable_list:
         column_headers.append(key)
     column_headers.append('EventWeight')
+    column_headers.append('xsec_rwgt')
     column_headers.append('nEvent')
 
     if JES_flag == 0:
@@ -95,7 +94,8 @@ def main():
     'ttW' : ('TTW_'+JESname+region),
     'ttZ' : ('TTZ_'+JESname+region),
     'Conv' : ('Convs_'+JESname+region),
-    'EWK' : ('EWK_'+JESname+region),
+    'ZZ' : ('ZZ_'+JESname+region),
+    'WZ' : ('WZ_'+JESname+region),
     'Fakes' : ('Fakes_'+JESname+region),
     'Flips' : ('Flips_'+JESname+region),
     'Rares' : ('Rares_'+JESname+region),
@@ -105,14 +105,15 @@ def main():
     }
 
     # Remove 'nEvent' from columns that will be used during in training
-    training_columns = column_headers[:-2]
+    training_columns = column_headers[:-3]
     num_variables = len(training_columns)
+    print 'num_variables: ', num_variables
 
     # Name of directory that contains trained MVA model to apply.
     input_models_path = ''
 
     if selection == 'tH':
-        input_models_path = ['2017samples_tH_tunedweights']
+        input_models_path = ['2017tautag2p1samples_xsecrwonly_newvars_tH_selection']
 
     # Load trained model
     optimizer = 'Adam'
@@ -135,11 +136,11 @@ def main():
 
         # Use JES flag to decide if we are running on a JES varied sample or not.
         if JES_flag==1:
-            inputs_file_path = 'b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1110/%s%s/' % ('JESUp',region)
+            inputs_file_path = 'b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_deeptau2p1_1205/%s%s/' % ('JESUp',region)
         elif JES_flag==2:
-            inputs_file_path = 'b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1110/%s%s/' % ('JESDown',region)
+            inputs_file_path = 'b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_deeptau2p1_1205/%s%s/' % ('JESDown',region)
         else:
-            inputs_file_path = 'b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1110/%s/%s/%s/' % (region,annum,region)
+            inputs_file_path = 'b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_deeptau2p1_1205/%s/%s/%s/' % (region,annum,region)
 
         print '<unit_test_evaluation> Input file directory: ', inputs_file_path
 
@@ -167,7 +168,7 @@ def main():
             print '<unit_test_evaluation> Applying selection ', selection
             selection_criteria=''
             if selection=='tH':
-                selection_criteria = '(is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)'#&& n_presel_jet>=3'
+                selection_criteria = '(is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)'
             data = DNN_applier.load_data(inputs_file_path,column_headers,selection_criteria,process,process_filename.get(process))
             if len(data) == 0 :
                 print '<unit_test_evaluation> No data! Next file.'
@@ -297,7 +298,7 @@ def main():
             is_tH_like_and_not_ttH_like = array('d',[0])
             is_tH_like_and_not_ttH_like = output_tree.is_tH_like_and_not_ttH_like
 
-            if (is_tH_like_and_not_ttH_like == 0 or is_tH_like_and_not_ttH_like == 1): #and n_presel_jet>=3:
+            if (is_tH_like_and_not_ttH_like == 0 or is_tH_like_and_not_ttH_like == 1):
                 pass_selection = 1
             else:
                 pass_selection = 0
@@ -307,15 +308,6 @@ def main():
                     continue
             else:
                 print 'NO selection applied!'
-
-
-
-            '''if Eventnum_ in uniqueEventID:
-                print 'Eventnum_ : %s already exists ' % Eventnum_
-                continue
-            else:
-                uniqueEventID.append(Eventnum_)
-            '''
 
 
             if 'ttH_' in process:
@@ -332,21 +324,14 @@ def main():
             EventWeights_.append(EventWeight_)
 
             evaluated_node_values = []
-            #print 'Eventnum_: ', Eventnum_
-            #for key,var in variable_list:
-            #    print 'key: %s, value: %s' % (key , data_tree.GetLeaf(key).GetValue())
-            #print 'True process: ', true_process
             # Get the value for event on each of the DNN nodes
             evaluated_node_values = DNN_applier.evaluate_model(eventnum_resultsprob_dict,Eventnum_)
-            #print 'evaluated_node_values: ', evaluated_node_values
             # Get the maximum output value
             maxval = max(evaluated_node_values)
             # Find the max value in and return its position (i.e. node classification)
             event_classification = evaluated_node_values.index(maxval)
-            #print 'event_classification: ', event_classification
             # Append classification value to list of predictions
             model1_pred_process.append(event_classification)
-            #print 'model1_pred_process: ', model1_pred_process
 
             eval_ttHnode_all[0] = evaluated_node_values[0]
             eval_Othernode_all[0] = evaluated_node_values[1]
@@ -409,7 +394,10 @@ def main():
     Plotter.conf_matrix(true_process,model1_pred_process,EventWeights_,'')
     Plotter.save_plots(dir=plots_dir, filename='yields_non_norm_confusion_matrix_APPL.png')
     Plotter.conf_matrix(true_process,model1_pred_process,EventWeights_,'index')
-    Plotter.save_plots(dir=plots_dir, filename='yields_norm_confusion_matrix_APPL.png')
+    Plotter.save_plots(dir=plots_dir, filename='yields_norm_index_confusion_matrix_APPL.png')
+    Plotter.conf_matrix(true_process,model1_pred_process,EventWeights_,'columns')
+    Plotter.save_plots(dir=plots_dir, filename='yields_norm_columns_confusion_matrix_APPL.png')
+
 
     model1_probs_ = np.array(model1_probs_)
     Plotter.ROC_sklearn(true_process, model1_probs_, true_process, model1_probs_, 0 , 'ttHnode')

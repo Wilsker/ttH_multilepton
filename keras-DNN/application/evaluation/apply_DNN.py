@@ -90,8 +90,11 @@ class apply_DNN(object):
         if 'THW' in eos_root_filename:
             sampleName='THW'
             target=4
-        if 'EWK' in eos_root_filename:
-            sampleName='EWK'
+        if 'ZZ' in eos_root_filename:
+            sampleName='ZZ'
+            target=4
+        if 'WZ' in eos_root_filename:
+            sampleName='WZ'
             target=4
         if 'Rares' in eos_root_filename:
             sampleName='Rares'

@@ -58,8 +58,7 @@ def load_data(inputPath,variables,criteria):
     # Load dataset to .csv format file
     my_cols_list=variables+['process', 'key', 'target', 'totalWeight','sampleWeight']
     data = pd.DataFrame(columns=my_cols_list)
-    #keys=['ttH','ttJ','ttW','THQ']
-    keys=['THQ','ttH','ttJ','ttW']
+    keys=['ttH','ttJ','ttW','THQ']
 
     for key in keys :
         print key
@@ -78,7 +77,6 @@ def load_data(inputPath,variables,criteria):
         if 'THQ' in key:
             sampleNames=['THQ']
             fileNames=['THQ_ctcvcp_DiLepRegion']
-            #criteria = "(" + criteria + "&&(nEvent%3==0))"
             target=3
         if 'ttZ' in key:
             sampleNames=['ttZ']
@@ -101,8 +99,8 @@ def load_data(inputPath,variables,criteria):
                 continue
             if tree is not None :
                 print 'criteria: ', criteria
-                #try: chunk_arr = tree2array(tree=tree, selection=criteria)#, start=0, stop=100) # Can use  start=first entry, stop = final entry desired
-                try: chunk_arr = tree2array(tree=tree, selection=criteria, start=0, stop=100) # Can use  start=first entry, stop = final entry desired
+                try: chunk_arr = tree2array(tree=tree, selection=criteria)
+                #try: chunk_arr = tree2array(tree=tree, selection=criteria, start=0, stop=100) # Can use  start=first entry, stop = final entry desired
                 except : continue
                 else :
                     chunk_df = pd.DataFrame(chunk_arr, columns=variables)
@@ -114,25 +112,40 @@ def load_data(inputPath,variables,criteria):
 
                     '''
                     2017 samples
-                    # Tuned weights for when not using event weights:
-                    Process ttH frequency:  333821
-                    Target ttJ frequency:  517071
-                    Process ttW frequency:  328345
-                    Process tHQ frequency:  95686 # 148233
-                    Target ttZ frequency:  117993
+                    ttH
+                    criteria:  (is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)
+                    Process ttH frequency:  359021
+                    TotalWeights = 81.408546
+                    ttH events with -ve weights 48473
+                    ttJ
+                    criteria:  (is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)
+                    Target ttJ frequency:  766657
+                    TotalWeights = 6925.520020
+                    ttJ events with -ve weights 173200
+                    ttW
+                    criteria:  (is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)
+                    Process ttW frequency:  376509
+                    TotalWeights = 240.894653
+                    ttW events with -ve weights 36711
+                    THQ
+                    criteria:  (is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)
+                    Process tHQ frequency:  146159
+                    TotalWeights = 8.518734
+                    xsec_rwgt = 2.293569
                     '''
 
-                    # old weights: tuned_weighted = {0 : 7.67, 1 : 1.0, 2 : 4.62, 3 : 7.67}
                     if sampleName=='ttH':
-                        chunk_df['sampleWeight'] = 1.5489468907
+                        #chunk_df['sampleWeight'] = 85.0711670984 # EventWeight
+                        chunk_df['sampleWeight'] = 2.13540990638 # absolute or xsec_rwgt
                     if sampleName=='ttJ':
                         chunk_df['sampleWeight'] = 1.0
                     if sampleName=='ttW':
-                        chunk_df['sampleWeight'] = 1.57477957636
+                        #chunk_df['sampleWeight'] = 28.749164557 # EventWeight
+                        chunk_df['sampleWeight'] = 2.03622489768 # absolute or xsec_rwgt
                     if sampleName=='THQ':
-                        chunk_df['sampleWeight'] = 5.40383128148
-                    if sampleName=='ttZ':
-                        chunk_df['sampleWeight'] = 1.0
+                        #chunk_df['sampleWeight'] = 812.975263695 # EventWeight
+                        #chunk_df['sampleWeight'] = 5.24536292668 # absolute
+                        chunk_df['sampleWeight'] = 334263.760977 # xsec_rwgt
 
                     chunk_df[['jet1_eta','jet2_eta','jet3_eta','jet4_eta','jetFwd1_eta']] = chunk_df[['jet1_eta','jet2_eta','jet3_eta','jet4_eta','jetFwd1_eta']].apply(np.absolute)
                     data = data.append(chunk_df, ignore_index=True)
@@ -148,17 +161,14 @@ def load_data(inputPath,variables,criteria):
         samplefreq = data.groupby('process')
         if key == 'ttH':
             print 'Process ttH frequency: ', len(processfreq.get_group('ttH'))
-        elif key == 'ttJ':
-            print 'Target ttJ frequency: ', len(samplefreq.get_group('ttJ'))
         elif key == 'ttW':
             print 'Process ttW frequency: ', len(processfreq.get_group('ttW'))
         elif key == 'THQ':
             print 'Process tHQ frequency: ', len(processfreq.get_group('THQ'))
-        elif key == 'ttZ':
-            print 'Target ttZ frequency: ', len(samplefreq.get_group('ttZ'))
-        elif key == 'Other':
-            print 'Process Other frequency: ', len(processfreq.get_group('Other'))
+        elif key == 'ttJ':
+            print 'Process Other frequency: ', len(processfreq.get_group('ttJ'))
         print "TotalWeights = %f" % (data.ix[(data.key.values==key)]["totalWeight"].sum())
+        print "xsec_rwgt = %f" % (data.ix[(data.key.values==key)]["xsec_rwgt"].sum())
         nNW = len(data.ix[(data["totalWeight"].values < 0) & (data.key.values==key) ])
         print key, "events with -ve weights", nNW
     print '<load_data> data columns: ', (data.columns.values.tolist())
@@ -230,18 +240,17 @@ def main():
     usage = 'usage: %prog [options]'
     parser = argparse.ArgumentParser(usage)
     parser.add_argument('-t', '--train_model', dest='train_model', help='Option to train model or simply make diagnostic plots (0=False, 1=True)', default=0, type=int)
-    parser.add_argument('-w', '--classweights', dest='classweights', help='Option to choose class weights', default='InverseSRYields', type=str)
     parser.add_argument('-s', '--sel', dest='selection', help='Option to choose selection', default='tH', type=str)
     args = parser.parse_args()
     do_model_fit = args.train_model
-    classweights_name = args.classweights
     selection = args.selection
 
     # Number of classes to use
     number_of_classes = 4
 
     # Create instance of output directory where all results are saved.
-    output_directory = '2017samples_%s_%s/' % (selection,classweights_name)
+    #output_directory = '2017tautag2p1samples_EVw8s_oldvars_%s_selection/' % (selection)
+    output_directory = '2017tautag2p1samples_xsecrwonly_oldvars_%s_selection/' % (selection)
 
     check_dir(output_directory)
 
@@ -249,9 +258,10 @@ def main():
     plots_dir = os.path.join(output_directory,'plots/')
 
     input_var_jsonFile = open('input_vars_SigRegion_wFwdJet.json','r')
+    #input_var_jsonFile = open('input_features_new.json','r')
 
     if selection == 'tH':
-        selection_criteria = '(is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)'#&& n_presel_jet>=3'
+        selection_criteria = '(is_tH_like_and_not_ttH_like==0 || is_tH_like_and_not_ttH_like==1)'
 
     # Load Variables from .json
     variable_list = json.load(input_var_jsonFile,encoding="utf-8").items()
@@ -265,7 +275,7 @@ def main():
     column_headers.append('nEvent')
 
     # Create instance of the input files directory
-    inputs_file_path = '/afs/cern.ch/work/j/jthomasw/private/IHEP/ttHML/github/ttH_multilepton/keras-DNN/samples/rootplas_LegacyMVA_1113/DiLepRegion/ttH2017TrainDNN2L/'
+    inputs_file_path = '/afs/cern.ch/work/j/jthomasw/private/IHEP/ttHML/github/ttH_multilepton/keras-DNN/samples/rootplas_LegacyMVA_deeptau2p1_1204/DiLepRegion/ttH2017TrainDNN2L/'
 
     # Load ttree into .csv including all variables listed in column_headers
     print '<train-DNN> Input file path: ', inputs_file_path
@@ -284,7 +294,7 @@ def main():
 
     # Create statistically independant lists train/test data (used to train/evaluate the network)
     traindataset, valdataset = train_test_split(data, test_size=0.2)
-    #valdataset.to_csv('valid_dataset.csv', index=False)
+    valdataset.to_csv('valid_dataset.csv', index=False)
 
     #print '<train-DNN> Training dataset shape: ', traindataset.shape
     #print '<train-DNN> Validation dataset shape: ', valdataset.shape
@@ -313,19 +323,20 @@ def main():
     #Plotter.correlation_matrix(train_df)
     #Plotter.save_plots(dir=plots_dir, filename=correlation_plot_file_name)
 
+    ####################################################################################
+    # Weights applied during training. You will also need to update the class weights if
+    # you are going to change the event weights applied. Introduce class weights and any
+    # event weight you want to use here.
     #sampleweights = traindataset.loc[:,'sampleWeight']*traindataset.loc[:,'EventWeight']
-    sampleweights = traindataset.loc[:,'sampleWeight']
+    sampleweights = traindataset.loc[:,'sampleWeight']*traindataset.loc[:,'xsec_rwgt']
     sampleweights = np.array(sampleweights)
 
-    # Dictionaries of class weights to combat class imbalance
-    if classweights_name == 'balanced':
-        tuned_weighted = class_weight.compute_class_weight('balanced', np.unique([0,1,2,3]), Y_train)
-    if classweights_name == 'tunedweights':
-        tuned_weighted = {0 : 7.67, 1 : 1.0, 2 : 4.62, 3 : 7.67}
-
-    # Per instance weights calculation so we can correctly apply event weights to diagnostic plots
-    train_weights = traindataset['EventWeight'].values * traindataset['xsec_rwgt'].values
-    test_weights = valdataset['EventWeight'].values * valdataset['xsec_rwgt'].values
+    # Event weights calculation so we can correctly apply event weights to diagnostic plots.
+    # use seperate list because we don't want to apply class weights in plots.
+    #train_weights = traindataset['EventWeight'].values
+    #test_weights = valdataset['EventWeight'].values
+    train_weights = traindataset['xsec_rwgt'].values
+    test_weights = valdataset['xsec_rwgt'].values
 
     # Fit label encoder to Y_train
     newencoder = LabelEncoder()
@@ -342,13 +353,12 @@ def main():
         histories = []
         labels = []
         # Define model and early stopping
-        early_stopping_monitor = EarlyStopping(patience=100,monitor='val_loss',verbose=1)
+        early_stopping_monitor = EarlyStopping(patience=50,monitor='val_loss',verbose=1)
         model3 = baseline_model(num_variables,optimizer,number_of_classes)
 
         # Fit the model
         # Batch size = examples before updating weights (larger = faster training)
         # Epochs = One pass over data (useful for periodic logging and evaluation)
-        #history3 = model3.fit(X_train,Y_train,validation_split=0.2,epochs=500,batch_size=1000,verbose=1,shuffle=True,class_weight=tuned_weighted,callbacks=[early_stopping_monitor])
         history3 = model3.fit(X_train,Y_train,validation_split=0.2,epochs=300,batch_size=1500,verbose=1,shuffle=True,sample_weight=sampleweights,callbacks=[early_stopping_monitor])
         histories.append(history3)
         labels.append(optimizer)
@@ -427,6 +437,13 @@ def main():
     Plotter.conf_matrix(original_encoded_test_Y,result_classes_test,test_weights,'index')
     Plotter.save_plots(dir=plots_dir, filename='yields_norm_confusion_matrix_TEST.png')
 
+
+    Plotter.conf_matrix(original_encoded_train_Y,result_classes_train,train_weights,'columns')
+    Plotter.save_plots(dir=plots_dir, filename='yields_norm_columns_confusion_matrix_TRAIN.png')
+    Plotter.conf_matrix(original_encoded_test_Y,result_classes_test,test_weights,'columns')
+    Plotter.save_plots(dir=plots_dir, filename='yields_norm_columns_confusion_matrix_TEST.png')
+
+
     Plotter.conf_matrix(original_encoded_train_Y,result_classes_train,train_weights,'')
     Plotter.save_plots(dir=plots_dir, filename='yields_matrix_TRAIN.png')
     Plotter.conf_matrix(original_encoded_test_Y,result_classes_test,test_weights,'')
@@ -436,8 +453,5 @@ def main():
     Plotter.ROC_sklearn(original_encoded_train_Y, result_probs, original_encoded_test_Y, result_probs_test, 1 , 'Other')
     Plotter.ROC_sklearn(original_encoded_train_Y, result_probs, original_encoded_test_Y, result_probs_test, 2 , 'ttWnode')
     Plotter.ROC_sklearn(original_encoded_train_Y, result_probs, original_encoded_test_Y, result_probs_test, 3 , 'tHQnode')
-
-    # Make table of separation on each node.
-    #Plotter.separation_table(Plotter.output_directory)
 
 main()

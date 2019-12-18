@@ -18,19 +18,19 @@ def main():
     files_list = []
     files_list_training = []
 
-    input_path_ttH_HWW_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTH_hww_DiLepRegion.root')[0]
-    input_path_ttH_HZZ_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTH_hzz_DiLepRegion.root')[0]
-    input_path_ttH_Htautau_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTH_htt_DiLepRegion.root')[0]
-    input_path_ttH_Hmm_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTH_hmm_DiLepRegion.root')[0]
-    input_path_ttH_Hother_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTH_hot_DiLepRegion.root')[0]
-    input_path_Conv_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/Conv_DiLepRegion.root')[0]
-    input_path_Fakes_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/Fakes_DiLepRegion.root')[0]
-    input_path_Flips_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/Flips_DiLepRegion.root')[0]
-    input_path_ttW_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTW_DiLepRegion.root')[0]
-    input_path_ttZ_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTZ_DiLepRegion.root')[0]
-    input_path_ttWW_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/TTWW_DiLepRegion.root')[0]
-    input_path_EWK_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/EWK_DiLepRegion.root')[0]
-    input_path_data_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Rootplas_WithTH_20190629/DiLepRegion/Data_DiLepRegion.root')[0]
+    input_path_ttH_HWW_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTH_hww_DiLepRegion.root')[0]
+    input_path_ttH_HZZ_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTH_hzz_DiLepRegion.root')[0]
+    input_path_ttH_Htautau_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTH_htt_DiLepRegion.root')[0]
+    input_path_ttH_Hmm_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTH_hmm_DiLepRegion.root')[0]
+    input_path_ttH_Hother_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTH_hzg_DiLepRegion.root')[0]
+    input_path_Conv_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/Convs_DiLepRegion.root')[0]
+    input_path_Fakes_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/Fakes_DiLepRegion.root')[0]
+    input_path_Flips_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/Flips_DiLepRegion.root')[0]
+    input_path_ttW_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTW_DiLepRegion.root')[0]
+    input_path_ttZ_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTZ_DiLepRegion.root')[0]
+    input_path_ttWW_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/TTWW_DiLepRegion.root')[0]
+    input_path_EWK_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion/EWK_DiLepRegion.root')[0]
+    input_path_data_DiLepRegion = CPlotter.getEOSlslist(directory='/b/binghuan/Rootplas/Legacy/rootplas_LegacyAll_1128/DiLepRegion/2018/DiLepRegion//Data_DiLepRegion.root')[0]
 
     files_list.append(input_path_Conv_DiLepRegion)
     files_list.append(input_path_Fakes_DiLepRegion)
@@ -82,7 +82,7 @@ def main():
     #'Hj_tagger_resTop',
     #'metLD',
     #'maxeta',
-    'massL'
+    #'massL'
     #'mindr_lep1_jet',
     #'mindr_lep2_jet',
     #'avg_dr_jet',
@@ -94,7 +94,7 @@ def main():
     #'Dilep_pdgId',
     #'lep1_charge',
     #'jetFwd1_pt',
-    #'jetFwd1_eta',
+    'jetFwd1_eta',
     #'n_presel_jetFwd'
     ]
 

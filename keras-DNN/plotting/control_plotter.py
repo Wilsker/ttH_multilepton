@@ -35,7 +35,7 @@ class control_plotter(object):
             print 'Creating directory ',dir
             os.makedirs(dir)
 
-    def getEOSlsfile(self, directory, mask='', prepend='root://eosuser.cern.ch/'):
+    def getEOSlslist(self, directory, mask='', prepend='root://eosuser.cern.ch/'):
         eos_dir = '/eos/user/%s ' % (directory)
         eos_cmd = 'eos ' + prepend + ' ls ' + eos_dir
         out = commands.getoutput(eos_cmd)
@@ -57,34 +57,6 @@ class control_plotter(object):
         ## return
         return full_list
 
-    def getEOSlslist(self, directory, mask='', prepend='root://eosuser.cern.ch/'):
-        from subprocess import Popen, PIPE
-
-        eos_cmd = '/afs/cern.ch/project/eos/installation/0.3.15/bin/eos.select'
-        eos_dir = '/eos/user/%s ' % (directory)
-        data = Popen([eos_cmd, prepend, ' ls ', eos_dir], stdout=PIPE)
-        out,err = data.communicate()
-
-        full_list = []
-
-        ## if input file was single root file:
-        if directory.endswith('.root'):
-            if len(out.split('\n')[0]) > 0:
-                return [os.path.join(prepend,eos_dir).replace(" ","")]
-
-        ## instead of only the file name append the string to open the file in ROOT
-        for line in out.split('\n'):
-            if len(line.split()) == 0: continue
-            full_list.append(os.path.join(prepend,eos_dir,line).replace(" ",""))
-
-        ## strip the list of files if required
-        if mask != '':
-            stripped_list = [x for x in full_list if mask in x]
-            return stripped_list
-
-        ## return
-        return full_list
-
     def open_files(self, input_files_names):
         input_files_list = []
         print 'input_files_names: ', input_files_names
@@ -96,6 +68,7 @@ class control_plotter(object):
         nbinsx = 10
         maxX = 10
         minX = 0
+        print 'Branch = ', branch_
         if 'n_presel_jet' in branch_ or 'nBJetLoose' in branch_ or 'nBJetMedium' in branch_:
             nbinsx = 10
             maxX = 10
@@ -120,6 +93,10 @@ class control_plotter(object):
             nbinsx = 20
             maxX = 1
             minX = -1
+        if 'jetFwd1_eta' in branch_:
+            nbinsx = 20
+            maxX = 5
+            minX = -5
         return [nbinsx,minX,maxX]
 
 
@@ -161,14 +138,12 @@ class control_plotter(object):
                     selection_criteria = 0
                     nJets_ = tree_.GetBranch('n_presel_jet').GetLeaf('n_presel_jet')
                     is_tH_like_and_not_ttH_like_ = tree_.GetBranch('is_tH_like_and_not_ttH_like').GetLeaf('is_tH_like_and_not_ttH_like')
-                    selection_criteria = 1 if ((tree_.is_tH_like_and_not_ttH_like==0 or tree_.is_tH_like_and_not_ttH_like==1)) else 0 #and tree_.n_presel_jet >= 3) else 0
+                    selection_criteria = 1 if ((tree_.is_tH_like_and_not_ttH_like==0 or tree_.is_tH_like_and_not_ttH_like==1)) else 0
                     if selection_criteria == 0:
                         continue
                     variable_ = tree_.GetBranch(branch_).GetLeaf(branch_)
                     weight_ = tree_.GetBranch('EventWeight').GetLeaf('EventWeight')
                     htemp.Fill(variable_.GetValue(), weight_.GetValue())
-                    #weight_ = 1
-                    #htemp.Fill(variable_.GetValue(), weight_)
 
                 keyname_file = file_.GetName().split('/')[-1:]
                 keyname = keyname_file[0].split('.')[:-1]
@@ -351,7 +326,7 @@ class control_plotter(object):
                     hist_.SetMarkerStyle(20)
                     hist_.SetLineColor(process_list[key])
                     hist_.SetFillColor(process_list[key])
-                    hist_.SetFillStyle(3002)
+                    #hist_.SetFillStyle(3002)
                     if 'Data' in name:
                         legend.AddEntry(hist_,key,'p')
                     else:

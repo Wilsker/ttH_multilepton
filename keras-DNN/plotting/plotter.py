@@ -118,7 +118,7 @@ class plotter(object):
 
     def ROC_sklearn(self, original_encoded_train_Y, result_probs_train, original_encoded_test_Y, result_probs_test, encoded_signal, pltname=''):
 
-        #SKLearn ROC and AUC
+        # ROC curve and AUC calculated using absolute number of examples, not weighted events.
         self.fig, self.ax1 = plt.subplots(ncols=1, figsize=(10,10))
 
         # Set value in list to 1 for signal and 0 for any background.
@@ -126,6 +126,7 @@ class plotter(object):
         SorB_class_test = []
         output_probs_train = []
         output_probs_test = []
+
         # Loop over all training events
         for i in xrange(0,len(original_encoded_train_Y)):
             # If training events truth value is target for the node assigned as signal by the variable encoded_signal append a 1
