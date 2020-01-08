@@ -45,7 +45,7 @@ def main():
 
     print '<unit_test_evaluation> Succesfully parsed arguments: processName= [%s], region= %s, JES_flag= %s , selection= %s' %(processes, region, JES_flag, selection)
 
-    outputname = '2017tautag2p1samples_xsecrwonly_newvars_tH_selection_%s' % (selection)
+    outputname = '2017samples_xmasupdates_tH_selection_%s' % (selection)
 
     input_var_jsonFile = ''
 
@@ -55,7 +55,8 @@ def main():
         outputname = outputname+'_JESDown'
 
     # Open and load input variable .json
-    input_var_jsonFile = open('../input_features_new.json','r')
+    #input_var_jsonFile = open('../input_features_new.json','r')
+    input_var_jsonFile = open('../input_vars_SigRegion_wFwdJet.json','r')
     variable_list = json.load(input_var_jsonFile,encoding="utf-8").items()
 
     # Append variables to a list of column headers for .csv file later
@@ -113,7 +114,7 @@ def main():
     input_models_path = ''
 
     if selection == 'tH':
-        input_models_path = ['2017tautag2p1samples_xsecrwonly_newvars_tH_selection']
+        input_models_path = ['2017samples_xmasupdates_tH_selection']
 
     # Load trained model
     optimizer = 'Adam'
