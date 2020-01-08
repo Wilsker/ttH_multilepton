@@ -1,5 +1,7 @@
 import os
 import argparse
+from os import environ
+os.environ['KERAS_BACKEND'] = 'tensorflow'
 
 ## --- This convertor runs with tensorflow backend ------------------------ ##
 ## --- if you get error starting with "Using Theano" ---------------------- ##
@@ -10,7 +12,7 @@ import argparse
 
 
 ## --- Example -- ##
-## python convert_hdf5_2_pb.py --input <input .hdf5 file name with path> --output <output file name> 
+## python convert_hdf5_2_pb.py --input <input .hdf5 file name with path> --output <output file name>
 
 
 parser = argparse.ArgumentParser(description='Deploy keras model.')
@@ -26,7 +28,6 @@ from keras import backend as K
 from keras.models import load_model
 
 K.set_learning_phase(0)
-#model = LoadModel(args.input)
 model = load_model(args.input)
 
 print(model.inputs[0].name)
@@ -44,10 +45,10 @@ with K.get_session() as sess:
 
     ops = sess.graph.get_operations()
     const_graph = convert_variables_to_constants(sess, sess.graph.as_graph_def(add_shapes=True), [node.op.name for node in model.outputs])
-    print ([node.op.name for node in model.outputs])
-    # final_graph = const_graph
+    #print ([node.op.name for node in model.outputs])
+    for node in model.outputs:
+        print 'node.op.name: ' , node.op.name
     final_graph = const_graph
-
 
     #for node in model.outputs :
     #    shapes = node.op.attr[model.outputs[0].name]
@@ -57,8 +58,10 @@ with K.get_session() as sess:
 
 if args.output is None:
     input_base = os.path.basename(args.input)
-    out_dir = '.'
-    out_file = os.path.splitext(input_base)[0] + ".pb"
+    out_dir = 'data/networks/'
+    out_file_name = args.input.split('/')[0]
+    print 'out_file_name: ', out_file_name
+    out_file = out_file_name + ".pb"
 else:
     out_dir, out_file = os.path.split(args.output)
 write_graph(final_graph, out_dir, out_file, as_text=False)

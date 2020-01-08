@@ -49,6 +49,10 @@ from keras.models import load_model
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.callbacks import EarlyStopping
 from plotting.plotter import plotter
+
+from numpy.testing import assert_allclose
+from keras.callbacks import ModelCheckpoint
+
 from root_numpy import root2array, tree2array
 seed = 7
 np.random.seed(7)
@@ -250,7 +254,7 @@ def main():
 
     # Create instance of output directory where all results are saved.
     #output_directory = '2017tautag2p1samples_EVw8s_oldvars_%s_selection/' % (selection)
-    output_directory = '2017tautag2p1samples_xsecrwonly_oldvars_%s_selection/' % (selection)
+    output_directory = '2017samples_xmasupdates_%s_selection/' % (selection)
 
     check_dir(output_directory)
 
@@ -275,7 +279,7 @@ def main():
     column_headers.append('nEvent')
 
     # Create instance of the input files directory
-    inputs_file_path = '/afs/cern.ch/work/j/jthomasw/private/IHEP/ttHML/github/ttH_multilepton/keras-DNN/samples/rootplas_LegacyMVA_deeptau2p1_1204/DiLepRegion/ttH2017TrainDNN2L/'
+    inputs_file_path = '/afs/cern.ch/work/j/jthomasw/private/IHEP/ttHML/github/ttH_multilepton/keras-DNN/samples/rootplas_LegacyMVA_update_mbb_20191229/DiLepRegion/ttH2017TrainDNN2L/'
 
     # Load ttree into .csv including all variables listed in column_headers
     print '<train-DNN> Input file path: ', inputs_file_path
@@ -294,7 +298,7 @@ def main():
 
     # Create statistically independant lists train/test data (used to train/evaluate the network)
     traindataset, valdataset = train_test_split(data, test_size=0.2)
-    valdataset.to_csv('valid_dataset.csv', index=False)
+    valdataset.to_csv((output_directory+'valid_dataset.csv'), index=False)
 
     #print '<train-DNN> Training dataset shape: ', traindataset.shape
     #print '<train-DNN> Validation dataset shape: ', valdataset.shape
@@ -320,8 +324,8 @@ def main():
 
     ## Input Variable Correlation plot
     correlation_plot_file_name = 'correlation_plot.png'
-    #Plotter.correlation_matrix(train_df)
-    #Plotter.save_plots(dir=plots_dir, filename=correlation_plot_file_name)
+    Plotter.correlation_matrix(train_df)
+    Plotter.save_plots(dir=plots_dir, filename=correlation_plot_file_name)
 
     ####################################################################################
     # Weights applied during training. You will also need to update the class weights if
@@ -353,7 +357,7 @@ def main():
         histories = []
         labels = []
         # Define model and early stopping
-        early_stopping_monitor = EarlyStopping(patience=50,monitor='val_loss',verbose=1)
+        early_stopping_monitor = EarlyStopping(patience=150,monitor='val_loss',verbose=1)
         model3 = baseline_model(num_variables,optimizer,number_of_classes)
 
         # Fit the model
@@ -374,6 +378,15 @@ def main():
         model_name = os.path.join(output_directory,'model.h5')
         print '<train-DNN> Loaded Model: %s' % (model_name)
         model = load_trained_model(model_name,num_variables,optimizer,number_of_classes)
+
+        '''continuetraining=1
+        if continuetraining == 1:
+            new_model = load_model(model_name)
+            assert_allclose(new_model.predict(X_train),new_model.predict(X_train),1e-5)
+            checkpoint = ModelCheckpoint(model_name, monitor='loss', verbose=1, save_best_only=True, mode='min')
+            callbacks_list = [checkpoint]
+            history3 = new_model.fit(X_train,Y_train,validation_split=0.2,epochs=50,batch_size=1500,verbose=1,shuffle=True,sample_weight=sampleweights,callbacks=callbacks_list)'''
+
 
     # Node probabilities for training sample events
     result_probs = model.predict(np.array(X_train))
@@ -401,7 +414,7 @@ def main():
     Plotter.output_directory = output_directory
 
     # Make overfitting plots of output nodes
-    Plotter.overfitting(model, Y_train, Y_test, result_probs, result_probs_test, plots_dir, train_weights, test_weights)
+    #Plotter.overfitting(model, Y_train, Y_test, result_probs, result_probs_test, plots_dir, train_weights, test_weights)
 
     # Get true process values for testing dataset
     original_encoded_test_Y = []
@@ -432,26 +445,26 @@ def main():
     result_classes_train = newencoder.inverse_transform(result_classes)
 
     # Create confusion matrices for training and testing performance
-    Plotter.conf_matrix(original_encoded_train_Y,result_classes_train,train_weights,'index')
+    '''Plotter.conf_matrix(original_encoded_train_Y,result_classes_train,train_weights,'index')
     Plotter.save_plots(dir=plots_dir, filename='yields_norm_confusion_matrix_TRAIN.png')
     Plotter.conf_matrix(original_encoded_test_Y,result_classes_test,test_weights,'index')
     Plotter.save_plots(dir=plots_dir, filename='yields_norm_confusion_matrix_TEST.png')
-
 
     Plotter.conf_matrix(original_encoded_train_Y,result_classes_train,train_weights,'columns')
     Plotter.save_plots(dir=plots_dir, filename='yields_norm_columns_confusion_matrix_TRAIN.png')
     Plotter.conf_matrix(original_encoded_test_Y,result_classes_test,test_weights,'columns')
     Plotter.save_plots(dir=plots_dir, filename='yields_norm_columns_confusion_matrix_TEST.png')
+    '''
 
-
-    Plotter.conf_matrix(original_encoded_train_Y,result_classes_train,train_weights,'')
+    '''Plotter.conf_matrix(original_encoded_train_Y,result_classes_train,train_weights,'')
     Plotter.save_plots(dir=plots_dir, filename='yields_matrix_TRAIN.png')
     Plotter.conf_matrix(original_encoded_test_Y,result_classes_test,test_weights,'')
-    Plotter.save_plots(dir=plots_dir, filename='yields_matrix_TEST.png')
+    Plotter.save_plots(dir=plots_dir, filename='yields_matrix_TEST.png')'''
 
+    '''
     Plotter.ROC_sklearn(original_encoded_train_Y, result_probs, original_encoded_test_Y, result_probs_test, 0 , 'ttHnode')
     Plotter.ROC_sklearn(original_encoded_train_Y, result_probs, original_encoded_test_Y, result_probs_test, 1 , 'Other')
     Plotter.ROC_sklearn(original_encoded_train_Y, result_probs, original_encoded_test_Y, result_probs_test, 2 , 'ttWnode')
     Plotter.ROC_sklearn(original_encoded_train_Y, result_probs, original_encoded_test_Y, result_probs_test, 3 , 'tHQnode')
-
+    '''
 main()
